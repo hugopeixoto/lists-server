@@ -1,20 +1,22 @@
 use actix_web::{web, Error, HttpResponse};
 use diesel::prelude::*;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::models;
-use crate::schema;
 use crate::db;
 use crate::http;
+use crate::models;
+use crate::schema;
 
+#[derive(Serialize, Deserialize)]
 struct View {
     collection: models::Collection,
     items: Vec<models::Item>,
 }
 
 fn fetch(user_id: Uuid, connection: &db::Connection) -> db::Result<Option<View>> {
-    use schema::collections as collections;
-    use schema::items as items;
+    use schema::collections;
+    use schema::items;
 
     let collection = collections::table
         .find(user_id)
@@ -40,13 +42,13 @@ pub async fn run(
     let conn = pool.get().map_err(http::internal_server_error)?;
 
     // look at me, blocking everything to make my life easier.
-    let r = web::block(move || { fetch(user_id, &conn) })
+    let r = web::block(move || fetch(user_id, &conn))
         .await
         .map_err(http::internal_server_error)?;
 
     if let Some(view) = r {
-        Ok(HttpResponse::Ok()
-           .body(format!("name: {}, items: {}", view.collection.name, view.items.len())))
+        let json = serde_json::to_string(&view).map_err(http::internal_server_error)?;
+        Ok(HttpResponse::Ok().body(json))
     } else {
         Ok(HttpResponse::NotFound().finish())
     }

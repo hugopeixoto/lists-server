@@ -1,9 +1,10 @@
+use serde::{Deserialize, Serialize};
 use std::time::SystemTime;
 use uuid::Uuid;
 
 use crate::schema::{collections, items};
 
-#[derive(Identifiable, Queryable)]
+#[derive(Identifiable, Queryable, Serialize, Deserialize)]
 #[table_name = "collections"]
 pub struct Collection {
     pub id: Uuid,
@@ -12,7 +13,7 @@ pub struct Collection {
     pub updated_at: SystemTime,
 }
 
-#[derive(Identifiable, Queryable, Associations)]
+#[derive(Identifiable, Queryable, Associations, Serialize, Deserialize)]
 #[belongs_to(Collection)]
 #[table_name = "items"]
 pub struct Item {
