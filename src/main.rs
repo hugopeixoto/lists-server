@@ -5,12 +5,16 @@ use actix_web::{web, App, HttpServer};
 use diesel::r2d2;
 
 pub mod actions;
-pub mod schema;
-pub mod models;
 pub mod db;
+pub mod models;
+pub mod schema;
 
 pub mod http {
-    pub fn internal_server_error<E>(_e: E) -> actix_web::HttpResponse {
+    pub fn internal_server_error<E>(e: E) -> actix_web::HttpResponse
+    where
+        E: core::fmt::Display,
+    {
+        println!("internal server error: {}", e);
         actix_web::HttpResponse::InternalServerError().finish()
     }
 }
