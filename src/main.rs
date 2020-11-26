@@ -29,9 +29,12 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .data(pool.clone())
             //.route("/", web::get().to(index))
-            .route("/collection/{id}", web::get().to(actions::collection_show))
-            //.route("/collection/{id}/item", web::post().to(item_create))
             //.route("/item/{id}", web::patch().to(item_update))
+            .route("/collection/{id}", web::get().to(actions::collection_show))
+            .route(
+                "/collection/{id}/item",
+                web::post().to(actions::item_create),
+            )
     })
     .bind(format!("127.0.0.1:{}", port))?
     .run()
